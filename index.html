@@ -5,7 +5,17 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
   <meta http-equiv="Permissions-Policy" content="">
   <script>
-    tf.env().set("TFHUB_CORS_URL", "https://tfhub.dev");
+    // Register the flag before setting it
+    tf.env().registerFlag('TFHUB_CORS_URL', () => {
+      return {
+        name: 'TFHUB_CORS_URL',
+        type: 'string',
+        defaultValue: 'https://tfhub.dev',
+        description: 'The URL to use for TFHub CORS requests.',
+      };
+    });
+
+    tf.env().set('TFHUB_CORS_URL', 'https://tfhub.dev');
   </script>
 </head>
 <body>
@@ -13,7 +23,7 @@
   <img id="image" />
   <script>
     // Load the TensorFlow.js object detection model.
-    const model = await tf.loadGraphModel('https://tfhub.dev/tensorflow/lite-model/object_detection/coco_ssd_mobilenet_v1/1/default/1', {mode: 'no-cors'});
+    const modelPromise = tf.loadGraphModel('https://tfhub.dev/tensorflow/lite-model/object_detection/coco_ssd_mobilenet_v1/1/default/1', {mode: 'no-cors'});
 
     // Create a function to get the current frame from the webcam.
     function getFrame() {
@@ -77,6 +87,8 @@
         document.getElementById("image").src = "eyes.jpg";
       } 
       else {
+        // If the object detection model does not detect eyes, show
+
         // If the object detection model does not detect eyes, show the image "no_eyes.jpg".
         document.getElementById("image").src = "no_eyes.jpg";
       }
