@@ -61,9 +61,10 @@
       }
 
       // If the object detection model detects eyes, show the image "eyes.jpg".
-      if (detections.some(detection => detection.classLabel === "eye")) {
+    if (detections.some(detection => detection.classLabel === "eye" && detection.confidence > 0.5)) {
         document.getElementById("image").src = "eyes.jpg";
-      } else {
+      } 
+    else {
         // If the object detection model does not detect eyes, show the image "no_eyes.jpg".
         document.getElementById("image").src = "no_eyes.jpg";
       }
