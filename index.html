@@ -9,10 +9,10 @@
     </style>
     <!-- Ignore source map error -->
     <meta name="sourceMapURL" content="">
-    <!-- Import compatible TensorFlow.js library for face-api.js -->
+    <!-- Import TensorFlow.js library -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4"></script>
-    <!-- Import face-api.js library from the local file -->
-    <script src="face-api.min.js"></script>
+    <!-- Import facedetect.js library -->
+    <script src="https://unpkg.com/@vladmandic/facedetect@latest/app.esm.js"></script>
 </head>
 <body>
     <!-- Display image of person with eyes open or closed -->
@@ -32,23 +32,21 @@
             }
         }
 
-        // Load the face-api.js models
+        // Load the facedetect.js models
         async function loadModels() {
-            const MODEL_URL = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights';
-            await faceapi.loadTinyFaceDetectorModel(MODEL_URL);
-            await faceapi.loadFaceLandmarkTinyModel(MODEL_URL);
+            await facedetect.ready();
         }
 
-        // Detect eyes in the webcam feed using the face-api.js library
+        // Detect eyes in the webcam feed using the facedetect.js library
         async function detectEyes(video) {
-            const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 224 });
-            const result = await faceapi.detectSingleFace(video, options).withFaceLandmarks(true);
+            const options = { maxResults: 1, fast: true };
+            const result = await facedetect.process(video, options);
 
-            if (result && result.landmarks) {
-                const eyeLeft = result.landmarks.getLeftEye();
-                const eyeRight = result.landmarks.getRightEye();
+            if (result && result.length > 0 && result[0].landmarks) {
+                const eyeLeft = result[0].landmarks.get("leftEye");
+                const eyeRight = result[0].landmarks.get("rightEye");
 
-                if (eyeLeft.length && eyeRight.length) {
+                if (eyeLeft && eyeRight) {
                     return true;
                 }
             }
