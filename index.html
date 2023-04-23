@@ -1,120 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Object Detection Web App</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-  <meta http-equiv="Permissions-Policy" content="">
-  <script>
-    // Register the flag before setting it
-    tf.env().registerFlag('TFHUB_CORS_URL', () => {
-      return {
-        name: 'TFHUB_CORS_URL',
-        type: 'string',
-        defaultValue: 'https://tfhub.dev',
-        description: 'The URL to use for TFHub CORS requests.',
-      };
-    });
-
-    tf.env().set('TFHUB_CORS_URL', 'https://tfhub.dev');
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Detection</title>
+    <style>
+        /* Add custom CSS styling here */
+    </style>
 </head>
 <body>
-  <video id="video"></video>
-  <img id="image" />
-  <script>
-    // Load the TensorFlow.js object detection model.
-    tf.io.setCORSRequestCredentials('use-credentials');
-    const modelPromise = tf.loadGraphModel('https://tfhub.dev/tensorflow/lite-model/object_detection/coco_ssd_mobilenet_v1/1/default/1', {mode: 'no-cors'});
+    <!-- Display image of person with eyes open or closed -->
+    <img id="person" src="" alt="Person image" />
 
-    // Create a function to get the current frame from the webcam.
-    function getFrame() {
-      // Get the video element.
-      const video = document.getElementById("video");
+    <!-- Import TensorFlow.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <!-- Import your TensorFlow model -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"> </script>
 
-      // Create a canvas element.
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+    <script>
+        // Access the user's webcam
+        async function getUserMediaStream() {
+            try {
+                const constraints = {
+                    video: true,
+                    audio: false
+                };
+                return await navigator.mediaDevices.getUserMedia(constraints);
+            } catch (err) {
+                console.error('Error accessing the webcam:', err);
+            }
+        }
 
-      // Draw the current frame from the video onto the canvas.
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0);
+        // Load the TensorFlow model
+        async function loadModel() {
+            return await tf.loadGraphModel('your_model_path_here.json');
+        }
 
-      // Convert the canvas to a tensor.
-      const tensor = tf.browser.fromPixels(canvas);
+        // Detect eyes in the webcam feed using the TensorFlow model
+        async function detectEyes(model, video) {
+            // Preprocess the video frame
+            const resizedVideo = tf.browser.fromPixels(video).resizeNearestNeighbor([224, 224]).toFloat();
+            const inputTensor = resizedVideo.expandDims(0);
 
-      // Expand the dimensions of the tensor to match the input shape of the model.
-      return tensor.expandDims();
-    }
+            // Run the model
+            const output = await model.predict(inputTensor);
+            return output;
+        }
 
-    // Create a function to perform object detection on the current frame.
-    async function detectObjects() {
-      // Get the current frame from the webcam.
-      const frame = getFrame();
+        // Main function to run the eye detection
+        async function runEyeDetection() {
+            // Access user's webcam
+            const stream = await getUserMediaStream();
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.onloadedmetadata = () => {
+                video.play();
+            };
 
-      // Load the object detection model.
-      const model = await modelPromise;
+            // Load the TensorFlow model
+            const model = await loadModel();
 
-      // Run the object detection model on the frame.
-      const detections = await model.executeAsync(frame);
+            // Run the eye detection and update the image
+            const personImage = document.getElementById('person');
+            setInterval(async () => {
+                const eyesDetected = await detectEyes(model, video);
 
-      // Remove the previously detected objects.
-      document.querySelectorAll(".detection").forEach((node) => node.remove());
+                if (eyesDetected) {
+                    personImage.src = 'https://www.istockphoto.com/photo/big-eyes-gm508260102-84927853';
+                } else {
+                    personImage.src = 'https://www.westend61.de/images/0000695620pw/portrait-of-young-man-with-closed-eyes-DISF002247.jpg';
+                }
+            }, 1000);
+        }
 
-
-      // Display the detected objects on the screen.
-      for (const detection of detections) {
-        const label = detection.class;
-        const confidence = detection.score;
-
-        // Create a rectangle around the detected object.
-        const rect = document.createElement("div");
-        rect.className = "detection";
-        rect.style.position = "absolute";
-        rect.style.width = detection.width + "px";
-        rect.style.height = detection.height + "px";
-        rect.style.left = detection.x + "px";
-        rect.style.top = detection.y + "px";
-        rect.style.border = "1px solid red";
-
-        // Display the label and confidence of the detected object.
-        const labelText = document.createElement("div");
-        labelText.className = "detection";
-        labelText.style.position = "absolute";
-        labelText.style.left = detection.x + "px";
-        labelText.style.top = (detection.y + detection.height + 4) + "px";
-        labelText.style.backgroundColor = "red";
-        labelText.style.color = "white";
-        labelText.style.fontSize = "10px";
-        labelText.textContent = `${label} (${Math.round(confidence * 100)}%)`;
-
-        // Add the rectangle and label to the screen.
-        document.body.appendChild(rect);
-        document.body.appendChild(labelText);
-      }
-
-      // If the object detection model detects eyes, show the image "eyes.jpg".
-      if (detections.some(detection => detection.class === "eye" && detection.score > 0.5)) {
-        document.getElementById("image").src = "eyes.jpg";
-      } 
-      else {
-        // If the object detection model does not detect eyes, show
-
-        // If the object detection model does not detect eyes, show the image "no_eyes.jpg".
-        document.getElementById("image").src = "no_eyes.jpg";
-      }
-    }
-
-
-    // Start the object detection loop.
-    setInterval(detectObjects, 1000);
-
-    // Start the webcam stream.
-    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-      const video = document.getElementById("video");
-      video.srcObject = stream;
-      video.play();
-    });
-  </script>
+        // Run the eye detection on page load
+        window.addEventListener('load', runEyeDetection);
+    </script>
 </body>
 </html>
