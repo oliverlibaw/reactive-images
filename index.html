@@ -67,9 +67,9 @@
                 const eyesDetected = await detectEyes(model, video);
 
                 if (eyesDetected) {
-                    personImage.src = 'eyes_open.jpg';
+                    personImage.src = 'eyes.jpg';
                 } else {
-                    personImage.src = 'eyes_closed.jpg';
+                    personImage.src = 'no_eyes.jpg';
                 }
             }, 1000);
         }
