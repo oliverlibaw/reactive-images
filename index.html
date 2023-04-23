@@ -4,6 +4,8 @@
   <title>Object Detection Web App</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
   <meta http-equiv="Permissions-Policy" content="">
+  tf.env().set("TFHUB_CORS_URL", "https://tfhub.dev");
+
 </head>
 <body>
   <video id="video"></video>
