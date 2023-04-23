@@ -23,6 +23,7 @@
   <img id="image" />
   <script>
     // Load the TensorFlow.js object detection model.
+    tf.io.setCORSRequestCredentials('use-credentials');
     const modelPromise = tf.loadGraphModel('https://tfhub.dev/tensorflow/lite-model/object_detection/coco_ssd_mobilenet_v1/1/default/1', {mode: 'no-cors'});
 
     // Create a function to get the current frame from the webcam.
