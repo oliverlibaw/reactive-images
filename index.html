@@ -70,7 +70,7 @@
         labelText.style.backgroundColor = "red";
         labelText.style.color = "white";
         labelText.style.fontSize = "10px";
-        labelText.textContent = `${label} (${Math.round(confidence * 100)}%)`;
+        labelText.textContent = `<span class="math-inline">\{label\} \(</span>{Math.round(confidence * 100)}%)`;
 
         // Add the rectangle and label to the screen.
         document.body.appendChild(rect);
