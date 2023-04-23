@@ -14,8 +14,8 @@
 
     <!-- Import TensorFlow.js library -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <!-- Import COCO-SSD model -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <!-- Import face-api.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
     <script>
         // Access the user's webcam
         async function getUserMediaStream() {
@@ -30,18 +30,23 @@
             }
         }
 
-        // Load the TensorFlow COCO-SSD model
-        async function loadModel() {
-            return await cocoSsd.load();
+        // Load the face-api.js models
+        async function loadModels() {
+            const MODEL_URL = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights';
+            await faceapi.loadTinyFaceDetectorModel(MODEL_URL);
+            await faceapi.loadFaceLandmarkTinyModel(MODEL_URL);
         }
 
-        // Detect eyes in the webcam feed using the TensorFlow model
-        async function detectEyes(model, video) {
-            const predictions = await model.detect(video);
+        // Detect eyes in the webcam feed using the face-api.js library
+        async function detectEyes(video) {
+            const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 224 });
+            const result = await faceapi.detectSingleFace(video, options).withFaceLandmarks(true);
 
-            // Check if any of the detected objects is an eye
-            for (const prediction of predictions) {
-                if (prediction.class === 'eye') {
+            if (result && result.landmarks) {
+                const eyeLeft = result.landmarks.getLeftEye();
+                const eyeRight = result.landmarks.getRightEye();
+
+                if (eyeLeft.length && eyeRight.length) {
                     return true;
                 }
             }
@@ -58,18 +63,18 @@
                 video.play();
             };
 
-            // Load the TensorFlow COCO-SSD model
-            const model = await loadModel();
+            // Load the face-api.js models
+            await loadModels();
 
             // Run the eye detection and update the image
             const personImage = document.getElementById('person');
             setInterval(async () => {
-                const eyesDetected = await detectEyes(model, video);
+                const eyesDetected = await detectEyes(video);
 
                 if (eyesDetected) {
-                    personImage.src = 'https://media.istockphoto.com/id/471734485/photo/mature-caucasian-man-closeup-surprised-look.jpg?s=612x612&w=0&k=20&c=P3HDNKl9bEiScO7gKQc0AJ5hJsMqHnRwzQjS3mPMuy8=';
+                    personImage.src = 'eyes_open.jpg';
                 } else {
-                    personImage.src = 'https://media.istockphoto.com/id/1281112498/photo/stay-calm-everything-will-be-alright.jpg?s=1024x1024&w=is&k=20&c=lI3uzLwOdH43dljL-GNsJ0aAoXfir4kN4VYH6iadAQs=';
+                    personImage.src = 'eyes_closed.jpg';
                 }
             }, 1000);
         }
