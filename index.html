@@ -5,64 +5,78 @@
 </head>
 <body>
   <video id="video"></video>
+  <img id="image" src="" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow.js/4.0.0/tensorflow.min.js"></script>
   <script>
     // Load the TensorFlow.js object detection model.
-    const model = tf.loadModel("https://tfhub.dev/tensorflow/lite-model/object_detection/coco/ssd_mobilenet_v1/1/default/tflite");
+    const modelPromise = tf.loadGraphModel("https://tfhub.dev/tensorflow/lite-model/object_detection/coco/ssd_mobilenet_v1/1/default/1");
 
     // Create a function to get the current frame from the webcam.
-    function getFrame() {
+    async function getFrame() {
       // Get the video element.
       const video = document.getElementById("video");
 
-      // Get the current frame from the video.
-      const frame = video.captureStream();
+      // Create a canvas element to draw the current frame on.
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
 
-      // Return the frame.
-      return frame;
+      // Draw the current frame on the canvas.
+      const context = canvas.getContext("2d");
+      context.drawImage(video, 0, 0);
+
+      // Convert the canvas to a tensor and return it.
+      return tf.browser.fromPixels(canvas);
     }
 
     // Create a function to perform object detection on the current frame.
-    function detectObjects() {
+    async function detectObjects() {
       // Get the current frame from the webcam.
-      const frame = getFrame();
+      const frame = await getFrame();
 
       // Run the object detection model on the frame.
-      const detections = model.detect(frame);
+      const detections = await modelPromise.executeAsync(frame);
 
       // Display the detected objects on the screen.
       for (const detection of detections) {
-        const label = detection.classLabel;
-        const confidence = detection.confidence;
+        const label = detection.class;
+        const confidence = detection.score;
 
         // Create a rectangle around the detected object.
         const rect = document.createElement("div");
-        rect.style.width = detection.boundingBox.width + "px";
-        rect.style.height = detection.boundingBox.height + "px";
-        rect.style.left = detection.boundingBox.x + "px";
-        rect.style.top = detection.boundingBox.y + "px";
+        rect.style.width = detection.box.width + "px";
+        rect.style.height = detection.box.height + "px";
+        rect.style.left = detection.box.left + "px";
+        rect.style.top = detection.box.top + "px";
         rect.style.border = "1px solid red";
 
         // Display the label and confidence of the detected object.
         const labelText = document.createElement("div");
-        labelText.textContent = label + " (" + confidence + "%)";
+        labelText.textContent = label + " (" + Math.round(confidence * 100) + "%)";
 
         // Add the rectangle and label to the screen.
         document.body.appendChild(rect);
         document.body.appendChild(labelText);
       }
+      
+      // If the object detection model detects eyes, show the image "eyes.jpg".
+      if (detections.some(detection => detection.class === "eye")) {
+        document.getElementById("image").src = "eyes.jpg";
+      } else {
+        // If the object detection model does not detect eyes, show the image "no_eyes.jpg".
+        document.getElementById("image").src = "no_eyes.jpg";
+      }
     }
-    // If the object detection model detects eyes, show the image "eyes.jpg".
-    if (detections.some(detection => detection.classLabel === "eye")) {
-      document.getElementById("image").src = "eyes.jpg"; } 
-    else {
-    // If the object detection model does not detect eyes, show the image "no_eyes.jpg".
-     document.getElementById("image").src = "no_eyes.jpg";
-    }
-
 
     // Start the object detection loop.
     setInterval(detectObjects, 1000);
+
+    // Start the webcam stream.
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      const video = document.getElementById("video");
+      video.srcObject = stream;
+      video.play();
+    });
   </script>
 </body>
 </html>
