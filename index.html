@@ -7,15 +7,17 @@
     <style>
         /* Add custom CSS styling here */
     </style>
+    <!-- Ignore source map error -->
+    <meta name="sourceMapURL" content="">
+    <!-- Import TensorFlow.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <!-- Import face-api.js library from the local file -->
+    <script src="face-api.min.js"></script>
 </head>
 <body>
     <!-- Display image of person with eyes open or closed -->
-    <img id="person" src="eyes_closed.jpg" alt="Person image" />
+    <img id="person" src="" alt="Person image" />
 
-    <!-- Import TensorFlow.js library -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <!-- Import face-api.js library -->
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
     <script>
         // Access the user's webcam
         async function getUserMediaStream() {
@@ -62,6 +64,12 @@
             video.onloadedmetadata = () => {
                 video.play();
             };
+
+            // Load the face-api.js models
+            await loadModels();
+
+           
+
 
             // Load the face-api.js models
             await loadModels();
