@@ -11,14 +11,16 @@
     <meta name="sourceMapURL" content="">
     <!-- Import TensorFlow.js library -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4"></script>
-    <!-- Import facedetect.js library -->
-    <script src="https://unpkg.com/@vladmandic/facedetect@latest/app.esm.js"></script>
+    <!-- Import face-landmarks-detection library -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
 </head>
 <body>
     <!-- Display image of person with eyes open or closed -->
-    <img id="person" src="eyes_closed.jpg" alt="Person image" />
+    <img id="person" src="eyes_open.jpg" alt="Titian Painting" />
 
     <script>
+        let model;
+
         // Access the user's webcam
         async function getUserMediaStream() {
             try {
@@ -45,25 +47,27 @@
             }
         }
 
-        // Load the facedetect.js models
+        // Load the face-landmarks-detection models
         async function loadModels() {
-            await facedetect.ready();
+          model = await faceLandmarksDetection.load(
+            faceLandmarksDetection.SupportedPackages.mediapipeFacemesh
+          );
         }
 
-        // Detect eyes in the webcam feed using the facedetect.js library
+        // Detect eyes in the webcam feed using the face-landmarks-detection library
         async function detectEyes(video) {
-            const options = { maxResults: 1, fast: true };
-            const result = await facedetect.process(video, options);
+          const options = { maxFaces: 1 };
+          const predictions = await model.estimateFaces({ input: video, ...options });
 
-            if (result && result.length > 0 && result[0].landmarks) {
-                const eyeLeft = result[0].landmarks.get("leftEye");
-                const eyeRight = result[0].landmarks.get("rightEye");
+          if (predictions && predictions.length > 0) {
+            const leftEye = predictions[0].annotations.leftEyeIris[0];
+            const rightEye = predictions[0].annotations.rightEyeIris[0];
 
-                if (eyeLeft && eyeRight) {
-                    return true;
-                }
+            if (leftEye && rightEye) {
+              return true;
             }
-            return false;
+          }
+          return false;
         }
 
         // Main function to run the eye detection
@@ -77,7 +81,7 @@
                 video.play();
             };
 
-            // Load the facedetect.js models
+            // Load the face-landmarks-detection models
             await loadModels();
 
             // Run the eye detection and update the image
