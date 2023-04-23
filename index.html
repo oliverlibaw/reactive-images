@@ -10,6 +10,9 @@
   <img id="image" />
   <script>
     // Load the TensorFlow.js object detection model.
+    const TFHUB_CORS_URL = "https://tfhub.dev";
+    tf.env().set("TFHUB_CORS_URL", TFHUB_CORS_URL);
+
 
     async function loadModel() {
       const model = await tf.loadGraphModel('https://tfhub.dev/tensorflow/lite-model/object_detection/coco_ssd_mobilenet_v1/1/default/1', {mode: 'no-cors'});
