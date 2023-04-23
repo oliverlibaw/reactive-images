@@ -14,9 +14,8 @@
 
     <!-- Import TensorFlow.js library -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <!-- Import your TensorFlow model -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"> </script>
-
+    <!-- Import COCO-SSD model -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     <script>
         // Access the user's webcam
         async function getUserMediaStream() {
@@ -31,20 +30,22 @@
             }
         }
 
-        // Load the TensorFlow model
+        // Load the TensorFlow COCO-SSD model
         async function loadModel() {
-            return await tf.loadGraphModel('your_model_path_here.json');
+            return await cocoSsd.load();
         }
 
         // Detect eyes in the webcam feed using the TensorFlow model
         async function detectEyes(model, video) {
-            // Preprocess the video frame
-            const resizedVideo = tf.browser.fromPixels(video).resizeNearestNeighbor([224, 224]).toFloat();
-            const inputTensor = resizedVideo.expandDims(0);
+            const predictions = await model.detect(video);
 
-            // Run the model
-            const output = await model.predict(inputTensor);
-            return output;
+            // Check if any of the detected objects is an eye
+            for (const prediction of predictions) {
+                if (prediction.class === 'eye') {
+                    return true;
+                }
+            }
+            return false;
         }
 
         // Main function to run the eye detection
@@ -57,7 +58,7 @@
                 video.play();
             };
 
-            // Load the TensorFlow model
+            // Load the TensorFlow COCO-SSD model
             const model = await loadModel();
 
             // Run the eye detection and update the image
@@ -66,9 +67,9 @@
                 const eyesDetected = await detectEyes(model, video);
 
                 if (eyesDetected) {
-                    personImage.src = 'https://www.istockphoto.com/photo/big-eyes-gm508260102-84927853';
+                    personImage.src = 'eyes_open.jpg';
                 } else {
-                    personImage.src = 'https://www.westend61.de/images/0000695620pw/portrait-of-young-man-with-closed-eyes-DISF002247.jpg';
+                    personImage.src = 'eyes_closed.jpg';
                 }
             }, 1000);
         }
