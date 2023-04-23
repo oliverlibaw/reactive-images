@@ -4,16 +4,14 @@
   <title>Object Detection Web App</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow.js/4.0.0/tensorflow.min.js"></script>
   <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
-
 </head>
 <body>
   <video id="video"></video>
   <img id="image" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow.js/4.0.0/tensorflow.min.js"></script>
   <script>
     // Load the TensorFlow.js object detection model.
     async function loadModel() {
-      return await tf.loadModel("https://tfhub.dev/tensorflow/lite-model/object_detection/coco/ssd_mobilenet_v1/1/default/tflite");
+      return await tf.loadGraphModel("https://tfhub.dev/tensorflow/lite-model/object_detection/coco_ssd_mobilenet_v1/1/default/1");
     }
     
     const modelPromise = loadModel();
@@ -24,7 +22,7 @@
       const video = document.getElementById("video");
 
       // Get the current frame from the video.
-      const frame = video.captureStream();
+      const frame = video;
 
       // Return the frame.
       return frame;
@@ -41,22 +39,34 @@
       // Run the object detection model on the frame.
       const detections = await model.detect(frame);
 
+      // Remove the previously detected objects.
+      document.querySelectorAll(".detection").forEach((node) => node.remove());
+
       // Display the detected objects on the screen.
       for (const detection of detections) {
-        const label = detection.classLabel;
-        const confidence = detection.confidence;
+        const label = detection.class;
+        const confidence = detection.score;
 
         // Create a rectangle around the detected object.
         const rect = document.createElement("div");
-        rect.style.width = detection.boundingBox.width + "px";
-        rect.style.height = detection.boundingBox.height + "px";
-        rect.style.left = detection.boundingBox.x + "px";
-        rect.style.top = detection.boundingBox.y + "px";
+        rect.className = "detection";
+        rect.style.position = "absolute";
+        rect.style.width = detection.width + "px";
+        rect.style.height = detection.height + "px";
+        rect.style.left = detection.x + "px";
+        rect.style.top = detection.y + "px";
         rect.style.border = "1px solid red";
 
         // Display the label and confidence of the detected object.
         const labelText = document.createElement("div");
-        labelText.textContent = label + " (" + confidence + "%)";
+        labelText.className = "detection";
+        labelText.style.position = "absolute";
+        labelText.style.left = detection.x + "px";
+        labelText.style.top = (detection.y + detection.height + 4) + "px";
+        labelText.style.backgroundColor = "red";
+        labelText.style.color = "white";
+        labelText.style.fontSize = "10px";
+        labelText.textContent = `${label} (${Math.round(confidence * 100)}%)`;
 
         // Add the rectangle and label to the screen.
         document.body.appendChild(rect);
@@ -64,10 +74,10 @@
       }
 
       // If the object detection model detects eyes, show the image "eyes.jpg".
-    if (detections.some(detection => detection.classLabel === "eye" && detection.confidence > 0.5)) {
+      if (detections.some(detection => detection.class === "eye" && detection.score > 0.5)) {
         document.getElementById("image").src = "eyes.jpg";
       } 
-    else {
+      else {
         // If the object detection model does not detect eyes, show the image "no_eyes.jpg".
         document.getElementById("image").src = "no_eyes.jpg";
       }
