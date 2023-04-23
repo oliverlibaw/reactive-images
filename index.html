@@ -12,7 +12,6 @@
     <!-- Import MediaPipe library -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/facemesh"></script>
     import facemesh from '@mediapipe/facemesh';
-
 </head>
 <body>
     <!-- Display image of person with eyes open or closed -->
@@ -46,26 +45,26 @@
                 console.error('Error accessing the webcam:', err);
             }
         }
+
         // Load the MediaPipe facemesh model
         async function loadModels() {
             model = await facemesh.load();
         }
 
-
         // Detect eyes in the webcam feed using the MediaPipe facemesh library
         async function detectEyes(video) {
-          const options = { maxFaces: 1 };
-          const predictions = await model.process(video, ...options);
+            const options = { maxFaces: 1 };
+            const predictions = await model.process(video, ...options);
 
-          if (predictions && predictions.length > 0) {
-            const leftEye = predictions[0].leftEye;
-            const rightEye = predictions[0].rightEye;
+            if (predictions && predictions.length > 0) {
+                const leftEye = predictions[0].leftEye;
+                const rightEye = predictions[0].rightEye;
 
-            if (leftEye && rightEye) {
-              return true;
+                if (leftEye && rightEye) {
+                    return true;
+                }
             }
-          }
-          return false;
+            return false;
         }
 
         // Main function to run the eye detection
