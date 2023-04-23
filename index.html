@@ -4,23 +4,16 @@
   <title>Object Detection Web App</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
   <meta http-equiv="Permissions-Policy" content="">
-  tf.env().set("TFHUB_CORS_URL", "https://tfhub.dev");
-
+  <script>
+    tf.env().set("TFHUB_CORS_URL", "https://tfhub.dev");
+  </script>
 </head>
 <body>
   <video id="video"></video>
   <img id="image" />
   <script>
     // Load the TensorFlow.js object detection model.
-    const TFHUB_CORS_URL = "https://tfhub.dev";
-    tf.env().set("TFHUB_CORS_URL", TFHUB_CORS_URL);
-
-
-    async function loadModel() {
-      const model = await tf.loadGraphModel('https://tfhub.dev/tensorflow/lite-model/object_detection/coco_ssd_mobilenet_v1/1/default/1', {mode: 'no-cors'});
-      return model;
-    }
-    const modelPromise = loadModel();
+    const model = await tf.loadGraphModel('https://tfhub.dev/tensorflow/lite-model/object_detection/coco_ssd_mobilenet_v1/1/default/1', {mode: 'no-cors'});
 
     // Create a function to get the current frame from the webcam.
     function getFrame() {
@@ -72,7 +65,7 @@
         labelText.style.backgroundColor = "red";
         labelText.style.color = "white";
         labelText.style.fontSize = "10px";
-        labelText.textContent = `<span class="math-inline">\{label\} \(</span>{Math.round(confidence * 100)}%)`;
+        labelText.textContent = `${label} (${Math.round(confidence * 100)}%)`;
 
         // Add the rectangle and label to the screen.
         document.body.appendChild(rect);
