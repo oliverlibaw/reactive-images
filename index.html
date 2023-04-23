@@ -23,10 +23,23 @@
         async function getUserMediaStream() {
             try {
                 const constraints = {
-                    video: true,
+                    video: {
+                        facingMode: 'user'
+                    },
                     audio: false
                 };
-                return await navigator.mediaDevices.getUserMedia(constraints);
+
+                return await new Promise((resolve, reject) => {
+                    navigator.getUserMedia = navigator.getUserMedia ||
+                                              navigator.webkitGetUserMedia ||
+                                              navigator.mozGetUserMedia ||
+                                              navigator.msGetUserMedia;
+                    if (navigator.getUserMedia) {
+                        navigator.getUserMedia(constraints, resolve, reject);
+                    } else {
+                        reject(new Error('getUserMedia not supported in this browser.'));
+                    }
+                });
             } catch (err) {
                 console.error('Error accessing the webcam:', err);
             }
@@ -58,12 +71,13 @@
             // Access user's webcam
             const stream = await getUserMediaStream();
             const video = document.createElement('video');
+            video.setAttribute('playsinline', '');
             video.srcObject = stream;
             video.onloadedmetadata = () => {
                 video.play();
             };
 
-            // Load the face-api.js models
+            // Load the facedetect.js models
             await loadModels();
 
             // Run the eye detection and update the image
