@@ -10,10 +10,11 @@
   <img id="image" />
   <script>
     // Load the TensorFlow.js object detection model.
+
     async function loadModel() {
-      return await tf.loadGraphModel("https://tfhub.dev/tensorflow/ssd_mobilenet_v2/fpnlite_640x640/1");
+      const model = await tf.loadGraphModel('https://tfhub.dev/tensorflow/lite-model/object_detection/coco_ssd_mobilenet_v1/1/default/1', {mode: 'no-cors'});
+      return model;
     }
-    
     const modelPromise = loadModel();
 
     // Create a function to get the current frame from the webcam.
