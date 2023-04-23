@@ -30,11 +30,20 @@
       // Get the video element.
       const video = document.getElementById("video");
 
-      // Get the current frame from the video.
-      const frame = video;
+      // Create a canvas element.
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
 
-      // Return the frame.
-      return frame;
+      // Draw the current frame from the video onto the canvas.
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0);
+
+      // Convert the canvas to a tensor.
+      const tensor = tf.browser.fromPixels(canvas);
+
+      // Expand the dimensions of the tensor to match the input shape of the model.
+      return tensor.expandDims();
     }
 
     // Create a function to perform object detection on the current frame.
@@ -46,10 +55,11 @@
       const model = await modelPromise;
 
       // Run the object detection model on the frame.
-      const detections = await model.detect(frame);
+      const detections = await model.executeAsync(frame);
 
       // Remove the previously detected objects.
       document.querySelectorAll(".detection").forEach((node) => node.remove());
+
 
       // Display the detected objects on the screen.
       for (const detection of detections) {
