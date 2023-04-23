@@ -11,7 +11,7 @@
   <script>
     // Load the TensorFlow.js object detection model.
     async function loadModel() {
-      return await tf.loadGraphModel("https://tfhub.dev/tensorflow/lite-model/object_detection/coco_ssd_mobilenet_v1/1/default/1");
+      return await tf.loadGraphModel("https://tfhub.dev/tensorflow/ssd_mobilenet_v2/fpnlite_640x640/1");
     }
     
     const modelPromise = loadModel();
