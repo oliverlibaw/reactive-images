@@ -1,4 +1,4 @@
-import * as faceapi from "face-api.js";
+import * as faceapi from "/face-api.js";
 
 (async () => {
   const output = document.getElementById("output");
