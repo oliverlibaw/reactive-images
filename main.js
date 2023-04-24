@@ -1,3 +1,9 @@
+(async function() {
+  if (window.MediaPipeLoadStatus) {
+    await window.MediaPipeLoadStatus;
+  }
+})();
+
 const output = document.getElementById('output');
 const eyesDetectedImage = document.getElementById('eyes-detected');
 const eyesNotDetectedImage = document.getElementById('eyes-not-detected');
