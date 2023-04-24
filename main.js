@@ -15,10 +15,10 @@
   async function detectEyes() {
     const inputTensor = tf.browser
       .fromPixels(video)
-      .resizeNearestNeighbor([128, 128])
       .toFloat()
       .expandDims(0);
-    const predictions = await model.executeAsync(inputTensor);
+    const resizedInput = tf.image.resizeBilinear(inputTensor, [128, 128]);
+    const predictions = await model.executeAsync(resizedInput);
 
     if (predictions[0].shape[1] > 0) {
       eyesDetectedImage.hidden = false;
