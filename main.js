@@ -8,7 +8,6 @@
   video.setAttribute("playsinline", ""); // Add this line
   document.body.appendChild(video);
 
-
   await faceapi.nets.tinyFaceDetector.loadFromUri("/reactive-images/models");
   await faceapi.nets.faceLandmark68TinyNet.loadFromUri("/reactive-images/models");
 
@@ -37,27 +36,33 @@
   }
 
   async function setupCamera() {
-  try {
-    const constraints = {
-      video: {
-        facingMode: "user"
-      }
-    };
+    try {
+      const constraints = {
+        video: {
+          facingMode: "user"
+        }
+      };
 
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    video.srcObject = stream;
-  } catch (error) {
-    console.error("Error setting up camera:", error);
-    alert(
-      "Camera access is required for this app to work. Please enable camera access and reload the page."
-    );
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      video.srcObject = stream;
+    } catch (error) {
+      console.error("Error setting up camera:", error);
+      alert(
+        "Camera access is required for this app to work. Please enable camera access and reload the page."
+      );
+    }
+
+    return new Promise((resolve) => {
+      video.onloadedmetadata = () => {
+        video.play();
+        resolve(video);
+      };
+    });
   }
 
-  return new Promise((resolve) => {
-    video.onloadedmetadata = () => {
-      video.play();
-      resolve(video);
-    };
-  });
-}
-}
+  video.onplay = () => {
+    detectEyes();
+  };
+
+  await setupCamera();
+})();
