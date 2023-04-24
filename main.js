@@ -1,7 +1,4 @@
 (async () => {
-  const MODEL_URL =
-    "https://tfhub.dev/tensorflow/tfjs-model/blazeface/1/default/1";
-
   const output = document.getElementById("output");
   const eyesDetectedImage = document.getElementById("eyes-detected");
   const eyesNotDetectedImage = document.getElementById("eyes-not-detected");
@@ -10,17 +7,25 @@
   video.style.display = "none";
   document.body.appendChild(video);
 
-  const model = await tf.loadGraphModel(MODEL_URL, { fromTFHub: true });
+  const MODEL_URL = "https://unpkg.com/face-api.js/models";
+
+  await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+  await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL);
 
   async function detectEyes() {
-    const inputTensor = tf.browser
-      .fromPixels(video)
-      .toFloat()
-      .expandDims(0);
-    const resizedInput = tf.image.resizeBilinear(inputTensor, [128, 128]);
-    const predictions = await model.executeAsync(resizedInput);
+    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks(true);
 
-    if (predictions[0].shape[1] > 0) {
+    let eyesDetected = false;
+
+    for (const detection of detections) {
+      const landmarks = detection.landmarks.getLeftEye();
+      if (landmarks.length > 0) {
+        eyesDetected = true;
+        break;
+      }
+    }
+
+    if (eyesDetected) {
       eyesDetectedImage.hidden = false;
       eyesNotDetectedImage.hidden = true;
     } else {
