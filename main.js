@@ -37,17 +37,26 @@
   }
 
   async function setupCamera() {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
+  try {
+    const constraints = {
+      video: {
+        facingMode: "user"
+      }
+    };
 
-    return new Promise((resolve) => {
-      video.onloadedmetadata = () => {
-        video.play();
-        resolve(video);
-      };
-    });
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = stream;
+  } catch (error) {
+    console.error("Error setting up camera:", error);
+    alert(
+      "Camera access is required for this app to work. Please enable camera access and reload the page."
+    );
   }
 
-  await setupCamera();
-  detectEyes();
-})();
+  return new Promise((resolve) => {
+    video.onloadedmetadata = () => {
+      video.play();
+      resolve(video);
+    };
+  });
+}
