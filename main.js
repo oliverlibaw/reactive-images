@@ -9,8 +9,10 @@ import * as faceapi from "face-api.js";
   video.style.display = "none";
   document.body.appendChild(video);
 
-  await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
-  await faceapi.nets.faceLandmark68TinyNet.loadFromUri("/models");
+
+  await faceapi.nets.tinyFaceDetector.loadFromUri("/reactive-images/models");
+  await faceapi.nets.faceLandmark68TinyNet.loadFromUri("/reactive-images/models");
+
 
   async function detectEyes() {
     const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks(true);
