@@ -12,7 +12,7 @@
   await faceapi.nets.faceLandmark68TinyNet.loadFromUri("/reactive-images/models");
 
   async function detectEyes() {
-    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.75 })).withFaceLandmarks(true);
+    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.65 })).withFaceLandmarks(true);
     let eyesDetected = false;
 
     for (const detection of detections) {
