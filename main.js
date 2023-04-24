@@ -13,9 +13,9 @@
   const model = await tf.loadGraphModel(MODEL_URL, { fromTFHub: true });
 
   async function detectEyes() {
-    const predictions = await model.estimateFaces(video, false);
+    const predictions = await model.executeAsync(tf.browser.fromPixels(video).expandDims(0));
 
-    if (predictions.length > 0) {
+    if (predictions[0].shape[1] > 0) {
       eyesDetectedImage.hidden = false;
       eyesNotDetectedImage.hidden = true;
     } else {
