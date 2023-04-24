@@ -1,26 +1,21 @@
-const output = document.getElementById("output");
-const eyesDetectedImage = document.getElementById("eyes-detected");
-const eyesNotDetectedImage = document.getElementById("eyes-not-detected");
+(async () => {
+  const MODEL_URL =
+    "https://tfhub.dev/tensorflow/tfjs-model/blazeface/1/default/1";
 
-async function main() {
-  const video = await setupCamera();
+  const output = document.getElementById("output");
+  const eyesDetectedImage = document.getElementById("eyes-detected");
+  const eyesNotDetectedImage = document.getElementById("eyes-not-detected");
 
-  const faceMesh = new FaceMesh.FaceMesh({
-    locateFile: (file) => {
-      return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-    },
-  });
+  const video = document.createElement("video");
+  video.style.display = "none";
+  document.body.appendChild(video);
 
-  faceMesh.setOptions({
-    maxNumFaces: 1,
-    minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5,
-  });
+  const model = await tf.loadGraphModel(MODEL_URL, { fromTFHub: true });
 
-  faceMesh.onResults(onResults);
+  async function detectEyes() {
+    const predictions = await model.estimateFaces(video, false);
 
-  async function onResults(results) {
-    if (results.multiFaceLandmarks) {
+    if (predictions.length > 0) {
       eyesDetectedImage.hidden = false;
       eyesNotDetectedImage.hidden = true;
     } else {
@@ -28,27 +23,21 @@ async function main() {
       eyesNotDetectedImage.hidden = false;
     }
 
-    await faceMesh.send({ image: video });
+    requestAnimationFrame(detectEyes);
   }
 
-  await faceMesh.send({ image: video });
-}
+  async function setupCamera() {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
 
-async function setupCamera() {
-  const video = document.createElement("video");
-  video.width = 640;
-  video.height = 480;
-  video.style.display = "none";
+    return new Promise((resolve) => {
+      video.onloadedmetadata = () => {
+        video.play();
+        resolve(video);
+      };
+    });
+  }
 
-  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  video.srcObject = stream;
-
-  return new Promise((resolve) => {
-    video.onloadedmetadata = () => {
-      video.play();
-      resolve(video);
-    };
-  });
-}
-
-main();
+  await setupCamera();
+  detectEyes();
+})();
