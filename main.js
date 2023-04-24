@@ -5,7 +5,9 @@
 
   const video = document.createElement("video");
   video.style.display = "none";
+  video.setAttribute("playsinline", ""); // Add this line
   document.body.appendChild(video);
+
 
   await faceapi.nets.tinyFaceDetector.loadFromUri("/reactive-images/models");
   await faceapi.nets.faceLandmark68TinyNet.loadFromUri("/reactive-images/models");
