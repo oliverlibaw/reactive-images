@@ -1,102 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eye Detection</title>
-    <style>
-        /* Add custom CSS styling here */
-    </style>
-    <!-- Ignore source map error -->
-    <meta name="sourceMapURL" content="">
-    <!-- Import MediaPipe library -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/facemesh-web"></script>
-
-    import facemesh from '@mediapipe/facemesh';
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eye Detection App</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
 </head>
 <body>
-    <!-- Display image of person with eyes open or closed -->
-    <img id="person" src="eyes_open.jpg" alt="Titian Painting" />
-
-    <script>
-        let model;
-
-        // Access the user's webcam
-        async function getUserMediaStream() {
-            try {
-                const constraints = {
-                    video: {
-                        facingMode: 'user'
-                    },
-                    audio: false
-                };
-
-                return await new Promise((resolve, reject) => {
-                    navigator.getUserMedia = navigator.getUserMedia ||
-                                              navigator.webkitGetUserMedia ||
-                                              navigator.mozGetUserMedia ||
-                                              navigator.msGetUserMedia;
-                    if (navigator.getUserMedia) {
-                        navigator.getUserMedia(constraints, resolve, reject);
-                    } else {
-                        reject(new Error('getUserMedia not supported in this browser.'));
-                    }
-                });
-            } catch (err) {
-                console.error('Error accessing the webcam:', err);
-            }
-        }
-
-        // Load the MediaPipe facemesh model
-        async function loadModels() {
-            model = await facemesh.load();
-        }
-
-        // Detect eyes in the webcam feed using the MediaPipe facemesh library
-        async function detectEyes(video) {
-            const options = { maxFaces: 1 };
-            const predictions = await model.process(video, ...options);
-
-            if (predictions && predictions.length > 0) {
-                const leftEye = predictions[0].leftEye;
-                const rightEye = predictions[0].rightEye;
-
-                if (leftEye && rightEye) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        // Main function to run the eye detection
-        async function runEyeDetection() {
-            // Access user's webcam
-            const stream = await getUserMediaStream();
-            const video = document.createElement('video');
-            video.setAttribute('playsinline', '');
-            video.srcObject = stream;
-            video.onloadedmetadata = () => {
-                video.play();
-            };
-
-            // Load the MediaPipe facemesh models
-            await loadModels();
-
-            // Run the eye detection and update the image
-            const personImage = document.getElementById('person');
-            setInterval(async () => {
-                const eyesDetected = await detectEyes(video);
-
-                if (eyesDetected) {
-                    personImage.src = 'eyes_open.jpg';
-                } else {
-                    personImage.src = 'eyes_closed.jpg';
-                }
-            }, 1000);
-        }
-
-        // Run the eye detection on page load
-        window.addEventListener('load', runEyeDetection);
-    </script>
+  <div id="output">
+    <img id="eyes-detected" src="eyes_detected.png" alt="Eyes detected" hidden>
+    <img id="eyes-not-detected" src="eyes_not_detected.png" alt="Eyes not detected" hidden>
+  </div>
+  <script src="main.js"></script>
 </body>
 </html>
