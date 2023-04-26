@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wink Detection</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
-    <script defer src="wink.js"></script>
 </head>
 <body>
-    <img id="wink-detected" src="wink_detected.jpg" alt="Wink detected" hidden>
-    <img id="wink-not-detected" src="wink_not_detected.jpg" alt="Wink not detected" hidden>
+    <h1>Wink Detection</h1>
+    <img id="wink-detected" src="wink_detected.jpg" alt="Wink detected" style="display:none;">
+    <img id="wink-not-detected" src="wink_not_detected.jpg" alt="Wink not detected" style="display:none;">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@3.14.0/dist/tf-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@3.14.0/dist/tf-converter.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@3.14.0/dist/tf-backend-webgl.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_landmarks@0.3.1622722938/face_landmarks.js"></script>
+    <script type="module" src="wink.js"></script> <!-- Change this line -->
 </body>
 </html>
