@@ -8,7 +8,8 @@
   document.body.appendChild(video);
 
   const model = await faceLandmarksDetection.load(
-    faceLandmarksDetection.SupportedPackages.mediapipeFacemesh
+    faceLandmarksDetection.SupportedPackages.mediapipeFacemesh,
+    { modelUrl: "/reactive-images/models/face_landmarks_3D_model.tflite" } // Add this line
   );
 
   async function detectWink() {
